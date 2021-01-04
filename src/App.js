@@ -7,11 +7,27 @@ const ffmpeg = createFFmpeg({ log: true })
 function App() {
   const [ready, setReady] = useState(false);
   const [video, setVideo] = useState();
+  const [gif, setGif] = useState();
 
+  const convertToGif = async () => {
+    // Write file to memory
+    ffmpeg.FS('writeFile', 'test.mp4', await fetchFile(video));
+
+    // Run the FFmpeg commands as you would in CLI
+    await ffmpeg.run('-i', 'test.mp4', '-t', '2.5', '-ss', '2.0', '-f', 'gif', 'out.gif');
+
+    // Read new file
+    const data = ffmpeg.FS('readFile', 'out.gif');
+
+    // Create an URL
+    const url = URL.createObjectURL(new Blob([data.buffer], { type: 'image/gif' }));
+    setGif(url)
+
+  }
+ 
   const load = async () => {
     await ffmpeg.load();
     setReady(true);
-
   }
 
   useEffect(() => {
